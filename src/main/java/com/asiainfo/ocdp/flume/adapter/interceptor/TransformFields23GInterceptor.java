@@ -17,49 +17,64 @@ import java.util.*;
 
 public class TransformFields23GInterceptor implements Interceptor{
  
-    private static final Logger logger = LoggerFactory
-            .getLogger(TransformFields23GInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransformFields23GInterceptor.class);
+    // 分隔符
+	private String separator = "";
+	// 列数
+	private int rowNumber;
+	// key的位置
+	private int keyLocation;
+   
+	private int timeLocation;
 
-    private TransformFields23GInterceptor() {
-       
-    }
+	private TransformFields23GInterceptor(String separator, int rowNumber, int keyLocation,int timeLocation) {
+		this.separator = separator;
+		this.rowNumber = rowNumber;
+		this.keyLocation = keyLocation;
+		this.timeLocation = timeLocation;
+	}
     @Override
-    public Event intercept(Event event) {
-        String body = new String(event.getBody(), Charsets.UTF_8);
-        StringBuffer  sb = new StringBuffer();
-        final List<String> valueList = Lists.newArrayList(Splitter.on('|').trimResults().split(body));
-        String imis = valueList.get(0);
-        // 时间在第四列  第一类imis
-        if(valueList.size() == 10 && StringUtils.isNotEmpty(imis)){
-        	String datetime = valueList.get(3);
-        	long timestamp = 0;
-        	if (datetime != null && !datetime.equals("")){
-        		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                try {
-                    Date date = sdf.parse(datetime);
-                    timestamp = date.getTime();
-                } catch (ParseException e) {
-                	logger.error("failed to analysis  procedure Start Time");
-                    e.printStackTrace();
-                }
-        	}
-        	// 时间戳字段格式不符合 过滤掉
-        	if (timestamp != 0){
-        		sb.append(valueList.get(0)).append("|").append(valueList.get(1)).append("|")
-            	.append(valueList.get(2)).append("|").append(timestamp).append("|")
-            	.append(valueList.get(4)).append("|").append(valueList.get(5)).append("|")
-            	.append(valueList.get(6)).append("|").append(valueList.get(7)).append("|")
-            	.append(valueList.get(8)).append("|").append(valueList.get(9));
-            	event.setBody(sb.toString().getBytes());
-            	return event;
-        	}
-        }
-      return null;
-    }
+	public Event intercept(Event event) {
+		Map<String, String> headers = event.getHeaders();
+		String body = new String(event.getBody(), Charsets.UTF_8);
+		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
+		int keyIndex = keyLocation - 1;
+		int timeIndex = timeLocation - 1;
+		String keyValue = valueList.get(keyIndex);
+		headers.put(Constants.KEY, keyValue);
+		event.setHeaders(headers);
+		if (valueList.size() == rowNumber && StringUtils.isNotBlank(keyValue)) {
+			String datetime = valueList.get(timeIndex).trim();
+			long timestamp = 0;
+			if (StringUtils.isNotBlank(datetime)) {
+				SimpleDateFormat sdf = new SimpleDateFormat(Constants.DATETIME_WITH_HYPHEN_COLON_MS);
+				try {
+					Date date = sdf.parse(datetime);
+					timestamp = date.getTime();
+				} catch (ParseException e) {
+					logger.error("failed to analysis  procedure Start Time");
+					e.printStackTrace();
+				}
+			}
+			// 时间戳字段格式不符合 过滤掉
+			if (timestamp != 0) {
+				valueList.remove(timeIndex);
+				valueList.add(timeIndex, Long.toString(timestamp));
+				StringBuffer sb = new StringBuffer();
+				for (String record : valueList) {
+					sb.append(record).append(separator);
+				}
+				String bodyString = sb.substring(0, sb.lastIndexOf(separator));
+				event.setBody(bodyString.getBytes());
+				return event;
+			}
+		}
+		return null;
+	}
 
     @Override
     public List<Event> intercept(List<Event> events) {
-        List<Event> intercepted = new ArrayList();
+    	List<Event> intercepted = Lists.newArrayListWithCapacity(events.size());  
         for (Event event : events) {
             Event interceptedEvent = intercept(event);
             if (interceptedEvent != null) {
@@ -71,18 +86,28 @@ public class TransformFields23GInterceptor implements Interceptor{
 
 
     public static class Builder implements Interceptor.Builder{
-  
+    	// 分隔符
+    	private String separator = "";
+    	// 列数
+    	private int rowNumber;
+    	// key的位置
+    	private int keyLocation;
+    	// time的位置
+    	private int timeLocation;
         @Override
         public Interceptor build() {
-            return new TransformFields23GInterceptor();
+            return new TransformFields23GInterceptor(separator,rowNumber,keyLocation,timeLocation);
         }
 
         @Override
         public void configure(Context context) {
-         
+             this.separator = context.getString(Constants.SEPARATOR).trim();
+             this.rowNumber = context.getInteger(Constants.ROWNUMBER).intValue();
+             this.keyLocation = context.getInteger(Constants.KEYLOCATION).intValue();
+             this.timeLocation = context.getInteger(Constants.TIMELOCATION).intValue();
         }
     }
-
+  
     @Override
     public void close() {
         // NO-OP...
