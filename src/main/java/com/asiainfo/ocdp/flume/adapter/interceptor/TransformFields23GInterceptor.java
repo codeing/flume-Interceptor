@@ -38,6 +38,11 @@ public class TransformFields23GInterceptor implements Interceptor{
 		Map<String, String> headers = event.getHeaders();
 		String body = new String(event.getBody(), Charsets.UTF_8);
 		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
+		if (keyLocation < 1 || timeLocation< 1){
+			logger.error("key or time index config error !");
+			return null;
+		}
+		
 		int keyIndex = keyLocation - 1;
 		int timeIndex = timeLocation - 1;
 		String keyValue = valueList.get(keyIndex);
@@ -51,7 +56,6 @@ public class TransformFields23GInterceptor implements Interceptor{
 				try {
 					Date date = sdf.parse(datetime);
 					timestamp = date.getTime();
-					System.out.println("timestamp is "+timestamp);
 				} catch (ParseException e) {
 					logger.error("failed to analysis  procedure Start Time");
 					e.printStackTrace();

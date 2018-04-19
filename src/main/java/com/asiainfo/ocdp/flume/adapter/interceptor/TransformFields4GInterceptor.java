@@ -35,6 +35,10 @@ public class TransformFields4GInterceptor implements Interceptor{
 		Map<String, String> headers = event.getHeaders();
 		String body = new String(event.getBody(), Charsets.UTF_8);
 		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
+		if (keyLocation < 1 ){
+			logger.error("key  index config error !");
+			return null;
+		}
 		int keyIndex = keyLocation - 1;
 		String keyValue = valueList.get(keyIndex);
 		headers.put(Constants.KEY, keyValue);
