@@ -35,7 +35,7 @@ a1.sources.s1.interceptors.i2.separator = \|
 a1.sources.s1.interceptors.i2.rowNumber = 10
 a1.sources.s1.interceptors.i2.keyLocation = 1
 a1.sources.s1.interceptors.i2.timeLocation = 4
-a1.sources.s1.interceptors.i2.dateFormat  = 4
+a1.sources.s1.interceptors.i2.dateFormat  = yyyy-MM-dd HH:mm:ss.SSS
 a1.sources.s1.interceptors.i2.dataSource  = 23G
 
 # Define a kafka channel
@@ -77,8 +77,7 @@ public class TransformFieldsInterceptor implements Interceptor{
     		String body = new String(event.getBody(), Charsets.UTF_8);
     		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
     		if (keyLocation < 1 || timeLocation< 1){
-    			logger.error("key or time index config error !");
-    			return null;
+    			throw new IllegalArgumentException("key or time index config error !");
     		}
     		int keyIndex = keyLocation - 1;
     		int timeIndex = timeLocation - 1;
