@@ -34,7 +34,7 @@ public class TransformFields23GInterceptor implements Interceptor{
 		this.timeLocation = timeLocation;
 	}
     @Override
-	public Event intercept(Event event) {
+	public Event intercept(Event event) {	
 		Map<String, String> headers = event.getHeaders();
 		String body = new String(event.getBody(), Charsets.UTF_8);
 		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
@@ -51,6 +51,7 @@ public class TransformFields23GInterceptor implements Interceptor{
 				try {
 					Date date = sdf.parse(datetime);
 					timestamp = date.getTime();
+					System.out.println("timestamp is "+timestamp);
 				} catch (ParseException e) {
 					logger.error("failed to analysis  procedure Start Time");
 					e.printStackTrace();

@@ -1,9 +1,5 @@
 package com.asiainfo.ocdp.flume.adapter.interceptor;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +16,7 @@ import com.google.common.collect.Lists;
 
 public class TransformFields4GInterceptor implements Interceptor{
  
-	private static final Logger logger = LoggerFactory.getLogger(TransformFields23GInterceptor.class);
+	private static final Logger logger = LoggerFactory.getLogger(TransformFields4GInterceptor.class);
 	// 分隔符
 	private String separator = "";
 	// 列数
@@ -33,7 +29,8 @@ public class TransformFields4GInterceptor implements Interceptor{
 		this.rowNumber = rowNumber;
 		this.keyLocation = keyLocation;
 	}
-    @Override
+
+	@Override
 	public Event intercept(Event event) {
 		Map<String, String> headers = event.getHeaders();
 		String body = new String(event.getBody(), Charsets.UTF_8);
@@ -42,9 +39,7 @@ public class TransformFields4GInterceptor implements Interceptor{
 		String keyValue = valueList.get(keyIndex);
 		headers.put(Constants.KEY, keyValue);
 		event.setHeaders(headers);
-		// 时间在第四列 第一列imis
 		if (valueList.size() == rowNumber && StringUtils.isNotBlank(keyValue)) {
-
 			StringBuffer sb = new StringBuffer();
 			for (String record : valueList) {
 				sb.append(record).append(separator);
