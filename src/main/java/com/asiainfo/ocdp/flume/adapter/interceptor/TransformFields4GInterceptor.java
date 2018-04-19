@@ -13,7 +13,33 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+/** 
 
+a1.channels = c1
+a1.sources = s1
+a1.sinks =k1
+
+a1.sources.s1.type = org.apache.flume.source.kafka.KafkaSource
+a1.sources.s1.channels = c1
+a1.sources.s1.batchSize = 5000
+a1.sources.s1.kafka.bootstrap.servers = host-10-1-241-58:6667
+a1.sources.s1.zookeeperConnect=host-10-1-241-58:2181
+a1.sources.s1.topic = ocspIn
+a1.sources.s1.kafka.consumer.group.id = test
+
+a1.sources.s1.interceptors = i2
+a1.sources.s1.interceptors.i2.type = com.asiainfo.ocdp.flume.adapter.interceptor.TransformFields4GInterceptor$Builder
+a1.sources.s1.interceptors.i2.separator = \|
+a1.sources.s1.interceptors.i2.rowNumber = 10
+a1.sources.s1.interceptors.i2.keyLocation = 1
+
+# Define a kafka channel
+a1.channels.c1.type = org.apache.flume.channel.kafka.KafkaChannel
+a1.channels.c1.kafka.bootstrap.servers = host-10-1-241-58:6667
+a1.channels.c1.kafka.topic = ocspOutput
+a1.channels.c1.parseAsFlumeEvent = false
+ *
+ */
 public class TransformFields4GInterceptor implements Interceptor{
  
 	private static final Logger logger = LoggerFactory.getLogger(TransformFields4GInterceptor.class);

@@ -14,7 +14,34 @@ import org.apache.commons.lang.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+/** 
+ 
+a1.channels = c1
+a1.sources = s1
+a1.sinks =k1
 
+a1.sources.s1.type = org.apache.flume.source.kafka.KafkaSource
+a1.sources.s1.channels = c1
+a1.sources.s1.batchSize = 5000
+a1.sources.s1.kafka.bootstrap.servers = host-10-1-241-58:6667
+a1.sources.s1.zookeeperConnect=host-10-1-241-58:2181
+a1.sources.s1.topic = ocspIn
+a1.sources.s1.kafka.consumer.group.id = test
+
+a1.sources.s1.interceptors = i2
+a1.sources.s1.interceptors.i2.type = com.asiainfo.ocdp.flume.adapter.interceptor.TransformFields23GInterceptor$Builder
+a1.sources.s1.interceptors.i2.separator = \|
+a1.sources.s1.interceptors.i2.rowNumber = 10
+a1.sources.s1.interceptors.i2.keyLocation = 1
+a1.sources.s1.interceptors.i2.timeLocation = 4
+
+# Define a kafka channel
+a1.channels.c1.type = org.apache.flume.channel.kafka.KafkaChannel
+a1.channels.c1.kafka.bootstrap.servers = host-10-1-241-58:6667
+a1.channels.c1.kafka.topic = ocspOutput
+a1.channels.c1.parseAsFlumeEvent = false
+ *
+ */
 public class TransformFields23GInterceptor implements Interceptor{
  
     private static final Logger logger = LoggerFactory.getLogger(TransformFields23GInterceptor.class);
