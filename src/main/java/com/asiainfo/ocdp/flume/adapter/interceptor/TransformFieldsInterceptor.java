@@ -119,7 +119,6 @@ public class TransformFieldsInterceptor implements Interceptor{
 						if (timestamp != 0) {
 							valueList.set(timeIndex, Long.toString(timestamp));
 							String bodyString = Joiner.on(separator).join(valueList);
-							;
 							event.setBody(bodyString.getBytes(Charsets.UTF_8));
 							return event;
 						}
