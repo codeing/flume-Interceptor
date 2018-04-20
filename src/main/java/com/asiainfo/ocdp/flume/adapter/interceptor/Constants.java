@@ -12,6 +12,10 @@ public class Constants {
 	
 	public static final String DATASOURCE_DEFAULT = "23G";
 	
+	public static final int ROWNUMBER_DEFAULT = 0;
+	public static final int KEYLOCATION_DEFAULT = 0;
+	public static final int  TIMELOCATION_DEFAULT = 0;
+	
 	public static final String SEPARATOR_SYMBOL = "|";
 	public static final String DATETIME_WITH_HYPHEN_COLON_MS = "yyyy-MM-dd HH:mm:ss.SSS";
 }

@@ -75,43 +75,62 @@ public class TransformFieldsInterceptor implements Interceptor{
     	try{
     		Map<String, String> headers = event.getHeaders();
     		String body = new String(event.getBody(), Charsets.UTF_8);
-    		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
-			if (keyLocation < 1 || timeLocation < 1 || keyLocation > valueList.size()
-					|| timeLocation > valueList.size()) {
-				logger.warn("event  body is  " + body);
-				logger.warn("flume conf keyLocation is " + keyLocation + ", timeLocation is " + timeLocation
-						+ ", rowNumber is " + rowNumber);
-				throw new IllegalArgumentException("keyLocation or timeLocation or rowNumber  config error !");
-			}
-			
-    		int keyIndex = keyLocation - 1;
-    		int timeIndex = timeLocation - 1;
-    		String keyValue = valueList.get(keyIndex);
-    		if (valueList.size() == rowNumber && StringUtils.isNotBlank(keyValue)) {
-    			headers.put(Constants.KEY, keyValue);
-        		event.setHeaders(headers);
-    			if(dataSource.equalsIgnoreCase(Constants.DATASOURCE_DEFAULT)){
-    				String datetime = valueList.get(timeIndex).trim();
-    				long timestamp = 0;
-    				if (StringUtils.isNotBlank(datetime)) {
-    					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-    					try {
-    						Date date = sdf.parse(datetime);
-    						timestamp = date.getTime();
-    					} catch (ParseException e) {
-    						logger.warn("event  body is  " + body);
-    						logger.warn("failed to parse  23G dataSource procedure startime. Exception follows is ",e);
-    					}
-    				}
-    				// 时间戳字段格式不符合 过滤掉
-    				if (timestamp != 0) {
-    					valueList.set(timeIndex, Long.toString(timestamp));
-    					String bodyString = Joiner.on(separator).join(valueList);;
+    		if(StringUtils.isNotBlank(body)){
+    			final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
+        		// 23G
+        		if(dataSource.equalsIgnoreCase(Constants.DATASOURCE_DEFAULT)){
+        			if (keyLocation < 1 || timeLocation < 1 || keyLocation > valueList.size()
+        					|| timeLocation > valueList.size() || rowNumber != valueList.size() ) {
+        				logger.warn("event  body is  " + body);
+        				logger.warn("flume conf keyLocation is " + keyLocation + ", timeLocation is " + timeLocation
+        						+ ", rowNumber is " + rowNumber);
+        				throw new IllegalArgumentException("keyLocation or timeLocation or rowNumber  config error !");
+        			}
+        		}else{
+        			if (keyLocation < 1  || keyLocation > valueList.size()
+        					|| timeLocation > valueList.size() || rowNumber != valueList.size() ) {
+        				logger.warn("event  body is  " + body);
+        				logger.warn("flume conf keyLocation is " + keyLocation 
+        						+ ", rowNumber is " + rowNumber);
+        				throw new IllegalArgumentException("keyLocation  or rowNumber  config error !");
+        			}
+        		}
+    			
+        		int keyIndex = keyLocation - 1;
+        		int timeIndex = timeLocation - 1;
+        		String keyValue = valueList.get(keyIndex);
+        		if (valueList.size() == rowNumber && StringUtils.isNotBlank(keyValue)) {
+        			headers.put(Constants.KEY, keyValue);
+            		event.setHeaders(headers);
+        			if(dataSource.equalsIgnoreCase(Constants.DATASOURCE_DEFAULT)){
+        				String datetime = valueList.get(timeIndex).trim();
+        				long timestamp = 0;
+        				if (StringUtils.isNotBlank(datetime)) {
+        					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        					try {
+        						Date date = sdf.parse(datetime);
+        						timestamp = date.getTime();
+        					} catch (ParseException e) {
+        						logger.warn("event  body is  " + body + " , dateFormat is " + dateFormat);
+        						logger.warn("failed to parse  23G dataSource procedure startime. Exception follows is ",e);
+        					}
+        				}
+        			
+        				if (timestamp != 0) {
+        					valueList.set(timeIndex, Long.toString(timestamp));
+        					String bodyString = Joiner.on(separator).join(valueList);;
+        					event.setBody(bodyString.getBytes(Charsets.UTF_8));
+        					return event;
+        				}
+        			}else {
+        				String bodyString = Joiner.on(separator).join(valueList);;
     					event.setBody(bodyString.getBytes(Charsets.UTF_8));
     					return event;
-    				}
-    			}
+        			}
+        			
+        		}
     		}
+    
     	}catch (Exception e) {
     	   logger.warn("Could not intercept event. Exception follows is ", e);
         } 
@@ -154,9 +173,9 @@ public class TransformFieldsInterceptor implements Interceptor{
              this.separator = context.getString(Constants.SEPARATOR,Constants.SEPARATOR_SYMBOL).trim();
              this.dateFormat = context.getString(Constants.DATAFORMAT,Constants.DATETIME_WITH_HYPHEN_COLON_MS).trim();
              this.dataSource = context.getString(Constants.DATASOURCE,Constants.DATASOURCE_DEFAULT).trim();
-             this.rowNumber = context.getInteger(Constants.ROWNUMBER).intValue();
-             this.keyLocation = context.getInteger(Constants.KEYLOCATION).intValue();
-             this.timeLocation = context.getInteger(Constants.TIMELOCATION).intValue(); 
+             this.rowNumber = context.getInteger(Constants.ROWNUMBER,Integer.valueOf(Constants.ROWNUMBER_DEFAULT)).intValue();
+             this.keyLocation = context.getInteger(Constants.KEYLOCATION,Integer.valueOf(Constants.KEYLOCATION_DEFAULT)).intValue();
+             this.timeLocation = context.getInteger(Constants.TIMELOCATION,Integer.valueOf(Constants.TIMELOCATION_DEFAULT)).intValue();  
         }
     }
   
