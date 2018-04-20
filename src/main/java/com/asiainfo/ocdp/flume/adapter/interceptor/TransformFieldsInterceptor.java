@@ -76,9 +76,14 @@ public class TransformFieldsInterceptor implements Interceptor{
     		Map<String, String> headers = event.getHeaders();
     		String body = new String(event.getBody(), Charsets.UTF_8);
     		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
-			if (keyLocation < 1 || timeLocation < 1) {
-				throw new IllegalArgumentException("key or time index config error !");
+			if (keyLocation < 1 || timeLocation < 1 || keyLocation > valueList.size()
+					|| timeLocation > valueList.size()) {
+				logger.warn("event  body is  " + body);
+				logger.warn("flume conf keyLocation is " + keyLocation + ", timeLocation is " + timeLocation
+						+ ", rowNumber is " + rowNumber);
+				throw new IllegalArgumentException("keyLocation or timeLocation or rowNumber  config error !");
 			}
+			
     		int keyIndex = keyLocation - 1;
     		int timeIndex = timeLocation - 1;
     		String keyValue = valueList.get(keyIndex);
@@ -94,7 +99,8 @@ public class TransformFieldsInterceptor implements Interceptor{
     						Date date = sdf.parse(datetime);
     						timestamp = date.getTime();
     					} catch (ParseException e) {
-    						logger.error("failed to parse  23G dataSource procedure startime. Exception follows is ",e);
+    						logger.warn("event  body is  " + body);
+    						logger.warn("failed to parse  23G dataSource procedure startime. Exception follows is ",e);
     					}
     				}
     				// 时间戳字段格式不符合 过滤掉
