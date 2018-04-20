@@ -30,7 +30,7 @@ a1.sources.s1.topic = ocspIn
 a1.sources.s1.kafka.consumer.group.id = test
 
 a1.sources.s1.interceptors = i2
-a1.sources.s1.interceptors.i2.type = com.asiainfo.ocdp.flume.adapter.interceptor.TransformFields23GInterceptor$Builder
+a1.sources.s1.interceptors.i2.type = com.asiainfo.ocdp.flume.adapter.interceptor.TransformFieldsInterceptor$Builder
 a1.sources.s1.interceptors.i2.separator = \|
 a1.sources.s1.interceptors.i2.rowNumber = 10
 a1.sources.s1.interceptors.i2.keyLocation = 1
@@ -58,7 +58,7 @@ public class TransformFieldsInterceptor implements Interceptor{
 	private int rowNumber;
 	// key的位置
 	private int keyLocation;
-   
+    // 时间字段位置
 	private int timeLocation;
 	
 
@@ -76,15 +76,15 @@ public class TransformFieldsInterceptor implements Interceptor{
     		Map<String, String> headers = event.getHeaders();
     		String body = new String(event.getBody(), Charsets.UTF_8);
     		final List<String> valueList = Lists.newArrayList(Splitter.on(separator).trimResults().split(body));
-    		if (keyLocation < 1 || timeLocation< 1){
-    			throw new IllegalArgumentException("key or time index config error !");
-    		}
+			if (keyLocation < 1 || timeLocation < 1) {
+				throw new IllegalArgumentException("key or time index config error !");
+			}
     		int keyIndex = keyLocation - 1;
     		int timeIndex = timeLocation - 1;
     		String keyValue = valueList.get(keyIndex);
-    		headers.put(Constants.KEY, keyValue);
-    		event.setHeaders(headers);
     		if (valueList.size() == rowNumber && StringUtils.isNotBlank(keyValue)) {
+    			headers.put(Constants.KEY, keyValue);
+        		event.setHeaders(headers);
     			if(dataSource.equalsIgnoreCase(Constants.DATASOURCE_DEFAULT)){
     				String datetime = valueList.get(timeIndex).trim();
     				long timestamp = 0;
@@ -94,7 +94,7 @@ public class TransformFieldsInterceptor implements Interceptor{
     						Date date = sdf.parse(datetime);
     						timestamp = date.getTime();
     					} catch (ParseException e) {
-    						logger.error("failed to parse  23G dataSource procedure startime. Exception follows. {} ",e);
+    						logger.error("failed to parse  23G dataSource procedure startime. Exception follows is ",e);
     					}
     				}
     				// 时间戳字段格式不符合 过滤掉
@@ -107,7 +107,7 @@ public class TransformFieldsInterceptor implements Interceptor{
     			}
     		}
     	}catch (Exception e) {
-    	   logger.warn("Could not intercept event. Exception follows. {} ", e);
+    	   logger.warn("Could not intercept event. Exception follows is ", e);
         } 
 		return null;
 	}
