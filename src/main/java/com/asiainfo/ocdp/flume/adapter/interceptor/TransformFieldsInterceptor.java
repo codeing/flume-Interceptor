@@ -125,7 +125,6 @@ public class TransformFieldsInterceptor implements Interceptor{
 						}
 					} else {
 						String bodyString = Joiner.on(separator).join(valueList);
-						;
 						event.setBody(bodyString.getBytes(Charsets.UTF_8));
 						return event;
 					}
