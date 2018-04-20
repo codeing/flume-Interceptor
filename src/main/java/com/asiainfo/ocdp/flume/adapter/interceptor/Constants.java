@@ -8,9 +8,9 @@ public class Constants {
 	public static final String KEYLOCATION = "keyLocation";
 	public static final String TIMELOCATION = "timeLocation";
 	public static final String DATAFORMAT = "dateFormat";
-	public static final String DATASOURCE = "dataSource";
+	public static final String DATASOURCE_TYPE = "dataSourceType";
 	
-	public static final String DATASOURCE_DEFAULT = "23G";
+	public static final String DATASOURCE_DEFAULT_TYPE = "23G";
 	
 	public static final int ROWNUMBER_DEFAULT = 0;
 	public static final int KEYLOCATION_DEFAULT = 0;
