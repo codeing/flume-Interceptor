@@ -32,7 +32,7 @@ a1.sources.s1.kafka.consumer.group.id = test
 a1.sources.s1.interceptors = i2
 a1.sources.s1.interceptors.i2.type = com.asiainfo.ocdp.flume.adapter.interceptor.TransformFieldsInterceptor$Builder
 a1.sources.s1.interceptors.i2.datasourceSeparator = \|
-a1.sources.s1.interceptors.i2.needSeparator = \|
+a1.sources.s1.interceptors.i2.needSeparator = \,
 
 a1.sources.s1.interceptors.i2.fieldNumber = 10
 a1.sources.s1.interceptors.i2.keyLocation = 1
@@ -70,7 +70,7 @@ public class TransformFieldsInterceptor implements Interceptor{
 	private TransformFieldsInterceptor(String datasourceSeparator,String needSeparator, String dateFormat, String dataSource, int fieldNumber,
 			int keyLocation, int timeLocation) {
 		this.datasourceSeparator = datasourceSeparator;
-		this.needSeparator = datasourceSeparator;
+		this.needSeparator = needSeparator;
 		this.dateFormat = dateFormat;
 		this.dataSource = dataSource;
 		this.fieldNumber = fieldNumber;
